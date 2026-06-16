@@ -1,0 +1,204 @@
+/* ===================================================================
+   SPACE PORTFOLIO — Clean Hybrid Cinematic (Video + Real-time 3D)
+   From-scratch rebuild aligned with detailed spec + heavy use of provided videos
+   =================================================================== */
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;color:#fff;font-family:'Inter',sans-serif;overflow:hidden;cursor:default}
+
+/* ========== VIDEO LAYERS (bottom — user's provided cinematic clips) ========== */
+#video-layers{position:fixed;inset:0;z-index:0;pointer-events:none}
+.cinematic-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .6s ease, filter .4s;z-index:1}
+.cinematic-video.active{opacity:1}
+.cinematic-full{z-index:2} /* dedicated full-bleed moments (rocket, wormhole, arrival) can be on top temporarily */
+
+/* Subtle cinematic treatment for background videos */
+#cinematic-bg{filter:brightness(0.85) saturate(1.1) contrast(1.05)}
+
+/* ========== FALLBACK PURE-CSS OVERLAYS (used in PERFORMANCE mode or as hybrid accents) ========== */
+/* Wormhole overlay (CSS radial tunnel + streaking lines) - for perf mode fallback */
+.wh-video-overlay{position:fixed;inset:0;z-index:50;pointer-events:none;opacity:0;transition:opacity .5s;perspective:800px;background:#000}
+.wh-bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,transparent 15%,rgba(74,158,255,.3)35%,rgba(108,99,255,.4)55%,rgba(0,0,0,.95)80%);transform-style:preserve-3d;animation:whSpin 1.5s linear infinite}
+@keyframes whSpin{from{transform:rotate(0) scale(1.2)}to{transform:rotate(360deg) scale(1.2)}}
+.wh-streaks{position:absolute;inset:0;background:repeating-conic-gradient(from 0deg at 50% 50%,transparent 0deg 2deg,rgba(74,158,255,.4) 3deg 4deg,transparent 5deg 6deg);animation:whStreaksAnim 1s linear infinite;mix-blend-mode:screen}
+@keyframes whStreaksAnim{from{transform:scale(1.5) rotate(0)}to{transform:scale(1.5) rotate(360deg)}}
+.wh-video-overlay.active{opacity:1}
+.wh-text{position:absolute;bottom:20%;left:50%;transform:translateX(-50%);font-family:'Orbitron',monospace;font-size:1.5rem;letter-spacing:12px;color:#4a9eff;animation:blink 1s infinite;text-shadow:0 0 30px #4a9eff,0 0 60px #4a9eff;z-index:2}
+
+/* Sector arrival flash (CSS radial + scan-line) */
+.sector-arrival-video{position:fixed;inset:0;z-index:25;pointer-events:none;opacity:0;transition:opacity .3s;background:#000}
+.sector-arrival-video.active{opacity:1;animation:arrivalFlash 2s ease-out}
+@keyframes arrivalFlash{0%{background:radial-gradient(circle at 50% 50%,#fff 0%,rgba(74,158,255,.8)30%,#000 70%);opacity:1}30%{background:radial-gradient(circle at 50% 50%,rgba(74,158,255,.4)0%,rgba(108,99,255,.3)40%,#000 80%);opacity:1}100%{background:radial-gradient(circle at 50% 50%,rgba(74,158,255,0)0%,rgba(108,99,255,0)60%,#000 100%);opacity:0}}
+.arrival-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(74,158,255,.1),transparent 50%,rgba(108,99,255,.1))}
+.sector-arrival-video::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0,transparent 3px,rgba(74,158,255,.05)3px,rgba(74,158,255,.05)4px);animation:scanlineShift 1s linear infinite}
+@keyframes scanlineShift{to{background-position:0 4px}}
+
+/* ========== 3D CANVAS (interactive layer above video) ========== */
+canvas#space{position:fixed;top:0;left:0;width:100%;height:100%;z-index:3;display:block;background:transparent}
+
+/* Cinematic post-processing overlays (work on video + 3D) */
+#vignette{position:fixed;inset:0;z-index:4;pointer-events:none;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,.72) 100%);mix-blend-mode:multiply}
+#chromaOverlay{position:fixed;inset:0;z-index:5;pointer-events:none;opacity:.55;mix-blend-mode:screen;background:radial-gradient(ellipse at 30% 50%,rgba(255,0,128,.05)0%,transparent 50%),radial-gradient(ellipse at 70% 50%,rgba(0,255,255,.05)0%,transparent 50%);animation:chromaShift 9s ease-in-out infinite alternate}
+@keyframes chromaShift{0%{transform:translateX(-1px)}100%{transform:translateX(1.2px)}}
+
+/* ========== SCREENS (boot, loading, cockpit) ========== */
+.screen{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;pointer-events:none;opacity:0;transition:opacity .55s cubic-bezier(.2,1,.3,1);display:flex;align-items:center;justify-content:center}
+.screen.active{opacity:1;pointer-events:auto}
+
+/* ========== BOOT ========== */
+#boot{background:rgba(0,0,0,.9);flex-direction:column;align-items:center;justify-content:center;padding:8%;backdrop-filter:blur(4px);z-index:20}
+.boot-content{width:100%;max-width:620px;text-align:center}
+.boot-logo{font-size:64px;color:#4a9eff;margin-bottom:28px;animation:logoFloat 4.2s ease-in-out infinite;filter:drop-shadow(0 0 22px #4a9eff)}
+@keyframes logoFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-14px) rotate(4deg)}}
+.boot-lines{width:100%;max-width:520px;margin:0 auto;text-align:left}
+.boot-lines p{font-family:'Orbitron',monospace;font-size:.72rem;letter-spacing:2.5px;color:#4a9eff;margin:7px 0;opacity:0;animation:bootLine .32s forwards;transform:translateX(-18px)}
+@keyframes bootLine{to{opacity:1;transform:translateX(0)}}
+
+/* ========== LOADING (rocket video plays behind) ========== */
+#loading{background:transparent;flex-direction:column;z-index:15}
+.load-content{text-align:center;position:relative;z-index:3}
+.load-content h1{margin-bottom:18px;font-family:'Orbitron',monospace;font-size:2.1rem;letter-spacing:9px;color:#fff}
+.load-content .glitch{position:relative}
+.load-content .glitch::before,.load-content .glitch::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;overflow:hidden}
+.load-content .glitch::before{color:#ff0080;animation:g1 2.1s infinite;clip-path:inset(0 0 65% 0)}
+.load-content .glitch::after{color:#00d4ff;animation:g2 2.1s infinite;clip-path:inset(65% 0 0 0)}
+@keyframes g1{0%,100%{transform:translate(0)}22%{transform:translate(-2.5px,2px)}58%{transform:translate(2px,-1.5px)}}
+@keyframes g2{0%,100%{transform:translate(0)}38%{transform:translate(2px,-2px)}78%{transform:translate(-2px,1.5px)}}
+.load-bar{width:320px;height:4px;background:#1a1a3e;border-radius:2px;margin:22px auto;overflow:hidden;position:relative;border:1px solid rgba(74,158,255,.3)}
+.load-fill{height:100%;width:0%;background:linear-gradient(90deg,#4a9eff,#00d4ff,#4a9eff);background-size:200% 100%;transition:width .25s;animation:shimmer 1.8s linear infinite}
+@keyframes shimmer{to{background-position:200% 0}}
+.load-sub{font-family:'Orbitron',monospace;font-size:.68rem;letter-spacing:3.5px;color:#4a9eff;margin-top:12px;opacity:.75;animation:blink 1.6s infinite}
+@keyframes blink{0%,48%{opacity:.7}51%,100%{opacity:.22}}
+
+/* ========== COCKPIT + HUD ========== */
+#cockpit{background:transparent;display:flex;pointer-events:none}
+#cockpit.active{pointer-events:none}
+#cockpit .pnav-btn,#cockpit .panel-close,#cockpit .content-panel,#cockpit .cv-btn,#cockpit .cblock,#cockpit .tag,#cockpit .pcard,#cockpit .sg,#cockpit .hud-stat .speed-fill{pointer-events:auto}
+
+.hud-top{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:13px 26px;background:linear-gradient(180deg,rgba(0,0,0,.62)0%,transparent 100%);z-index:25;backdrop-filter:blur(2.5px)}
+.hud-item{display:flex;flex-direction:column;gap:1px}
+.hud-label{font-family:'Orbitron',monospace;font-size:.48rem;letter-spacing:2.2px;color:#4a9eff;text-shadow:0 0 5px #4a9eff}
+.hud-value{font-family:'Orbitron',monospace;font-size:.78rem;color:#fff;text-shadow:0 0 6px rgba(74,158,255,.55)}
+
+/* Mode toggle (Cinematic vs Performance) */
+.mode-toggle{cursor:pointer;user-select:none;transition:all .2s}
+.mode-toggle:hover{filter:brightness(1.2)}
+.mode-toggle.perf .hud-value{color:#ffaa00;text-shadow:0 0 6px rgba(255,170,0,.6)}
+.mode-toggle.perf .hud-label{color:#ffaa00}
+
+.cockpit-frame{position:fixed;inset:0;pointer-events:none;z-index:20}
+.frame-top{position:absolute;top:0;left:0;right:0;height:52px;background:linear-gradient(180deg,rgba(0,0,0,.92)0%,transparent 100%);border-bottom:1px solid rgba(74,158,255,.18)}
+.frame-bottom{position:absolute;bottom:0;left:0;right:0;height:66px;background:linear-gradient(0deg,rgba(0,0,0,.92)0%,transparent 100%);border-top:1px solid rgba(74,158,255,.18)}
+.frame-left{position:absolute;top:52px;bottom:66px;left:0;width:88px;background:linear-gradient(90deg,rgba(0,0,0,.72)0%,transparent 100%);border-right:1px solid rgba(74,158,255,.13)}
+.frame-right{position:absolute;top:52px;bottom:66px;right:0;width:88px;background:linear-gradient(270deg,rgba(0,0,0,.72)0%,transparent 100%);border-left:1px solid rgba(74,158,255,.13)}
+.frame-corner{position:absolute;width:28px;height:28px;border:1px solid rgba(74,158,255,.38);box-shadow:0 0 9px rgba(74,158,255,.28)}
+.tl{top:18px;left:18px;border-right:none;border-bottom:none}
+.tr{top:18px;right:18px;border-left:none;border-bottom:none}
+.bl{bottom:18px;left:18px;border-right:none;border-top:none}
+.br{bottom:18px;right:18px;border-left:none;border-top:none}
+.hex-grid{position:absolute;inset:0;opacity:.045;background-image:repeating-linear-gradient(60deg,rgba(74,158,255,.32)0,rgba(74,158,255,.32)1px,transparent 1px,transparent 28px),repeating-linear-gradient(-60deg,rgba(74,158,255,.32)0,rgba(74,158,255,.32)1px,transparent 1px,transparent 28px)}
+
+.crosshair{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:78px;height:78px;z-index:23;pointer-events:none;transition:transform .08s linear}
+.ch-h{position:absolute;top:50%;left:0;width:100%;height:1px;background:linear-gradient(90deg,transparent 24%,rgba(74,158,255,.52)50%,transparent 76%)}
+.ch-v{position:absolute;left:50%;top:0;width:1px;height:100%;background:linear-gradient(180deg,transparent 24%,rgba(74,158,255,.52)50%,transparent 76%)}
+.ch-dot{position:absolute;top:50%;left:50%;width:6px;height:6px;background:#4a9eff;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 14px #4a9eff,0 0 28px #4a9eff}
+.ch-ring{position:absolute;border:1px solid rgba(74,158,255,.32);border-radius:50%}
+.ch-ring.r1{top:50%;left:50%;width:28px;height:28px;transform:translate(-50%,-50%);animation:chRing 2.1s ease-out infinite}
+.ch-ring.r2{top:50%;left:50%;width:48px;height:48px;transform:translate(-50%,-50%);animation:chRing 2.1s ease-out infinite .48s}
+@keyframes chRing{0%{opacity:1;transform:translate(-50%,-50%) scale(.48)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.6)}}
+
+.scanline{position:absolute;top:52px;left:88px;right:88px;height:2px;background:linear-gradient(90deg,transparent,rgba(74,158,255,.38),transparent);z-index:22;pointer-events:none;animation:scan 3.1s linear infinite}
+@keyframes scan{0%{top:52px}100%{top:calc(100% - 66px)}}
+.reticle{position:fixed;top:50%;left:50%;width:148px;height:148px;transform:translate(-50%,-50%);border:1px solid rgba(74,158,255,.1);border-radius:50%;z-index:21;pointer-events:none;animation:rotate 11s linear infinite}
+.reticle::before,.reticle::after{content:'';position:absolute;background:rgba(74,158,255,.38)}
+.reticle::before{top:0;left:50%;width:1px;height:30%;transform:translateX(-50%)}
+.reticle::after{bottom:0;left:50%;width:1px;height:30%;transform:translateX(-50%)}
+@keyframes rotate{to{transform:translate(-50%,-50%) rotate(360deg)}}
+
+.planet-nav{position:fixed;right:108px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:17px;z-index:24}
+.pnav-btn{width:15px;height:15px;border-radius:50%;background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.42);cursor:pointer;transition:transform .12s cubic-bezier(.2,1,.3,1), box-shadow .2s, background .2s;position:relative;pointer-events:auto;box-shadow:0 0 7px rgba(74,158,255,.1);will-change:transform}
+.pnav-btn:hover{background:rgba(74,158,255,.26);transform:scale(1.22) translateZ(1px);box-shadow:0 0 16px #4a9eff}
+.pnav-btn:active{transform:scale(0.88)}
+.pnav-btn.active{background:#4a9eff;box-shadow:0 0 16px #4a9eff,0 0 34px #4a9eff;transform:scale(1.3)}
+.pnav-btn::before{content:attr(data-name);position:absolute;right:24px;top:50%;transform:translateY(-50%);font-family:'Orbitron',monospace;font-size:.54rem;letter-spacing:2px;color:#4a9eff;white-space:nowrap;opacity:0;transition:opacity .25s;pointer-events:none;text-shadow:0 0 4px #4a9eff}
+.pnav-btn:hover::before{opacity:1}
+
+.hud-bottom{position:fixed;bottom:16px;left:24px;right:24px;display:flex;justify-content:space-between;align-items:center;z-index:24}
+.hud-radar{width:52px;height:52px;border:1px solid rgba(74,158,255,.38);border-radius:50%;background:radial-gradient(circle,rgba(74,158,255,.13),transparent 72%);position:relative;box-shadow:0 0 9px rgba(74,158,255,.26)}
+.hud-radar::before{content:'';position:absolute;top:50%;left:0;width:50%;height:1px;background:linear-gradient(90deg,transparent,#4a9eff);transform-origin:right;animation:radar 2.1s linear infinite}
+.hud-radar::after{content:'';position:absolute;top:30%;left:30%;width:2px;height:2px;background:#ff6b35;border-radius:50%;box-shadow:0 0 4px #ff6b35;animation:radarDot 4.2s linear infinite}
+@keyframes radar{to{transform:translateY(-50%) rotate(360deg)}}
+@keyframes radarDot{0%{top:30%;left:30%}25%{top:30%;left:70%}50%{top:70%;left:70%}75%{top:70%;left:30%}100%{top:30%;left:30%}}
+
+.hud-info{display:flex;gap:18px;font-family:'Orbitron',monospace;font-size:.58rem;letter-spacing:1px;color:#4a9eff;align-items:center}
+.hud-stat{display:flex;align-items:center;gap:7px}
+.hud-stat-label{min-width:58px}
+.speed-bar{width:118px;height:5px;background:rgba(74,158,255,.1);border-radius:3px;overflow:hidden;border:1px solid rgba(74,158,255,.28);box-shadow:0 0 4px rgba(74,158,255,.08) inset}
+.speed-fill{height:100%;background:linear-gradient(90deg,#4a9eff,#00d4ff);width:32%;transition:width .9s ease;box-shadow:0 0 9px #4a9eff}
+.speed-fill.sh{width:100%!important;background:linear-gradient(90deg,#00e676,#4a9eff);box-shadow:0 0 9px #00e676}
+
+/* ========== CONTENT PANEL (enhanced glassmorphism) ========== */
+.content-panel{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.93);max-width:720px;width:92%;background:linear-gradient(148deg, rgba(6,10,26,.93) 0%, rgba(0,4,18,.97) 100%);border:1px solid rgba(74,158,255,.32);border-radius:13px;padding:30px;z-index:35;backdrop-filter:blur(26px) saturate(1.12);box-shadow:0 18px 65px rgba(0,0,0,.68), 0 0 0 1px rgba(74,158,255,.08) inset, 0 0 75px rgba(74,158,255,.22);opacity:0;pointer-events:none;transition:all .46s cubic-bezier(.16,1,.3,1);max-height:82vh;overflow-y:auto}
+.content-panel.active{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.content-panel::before{content:'';position:absolute;inset:0;border-radius:13px;background:linear-gradient(118deg, rgba(255,255,255,.03) 0%, transparent 32%, rgba(74,158,255,.03) 62%, transparent 100%);pointer-events:none}
+
+.panel-close{position:absolute;top:14px;right:14px;width:30px;height:30px;border:1px solid #4a9eff;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#4a9eff;font-size:.82rem;transition:all .28s;background:rgba(0,0,0,.48)}
+.panel-close:hover{background:#4a9eff;color:#000;box-shadow:0 0 18px #4a9eff;transform:rotate(90deg)}
+
+.panel-content h1{font-family:'Orbitron',monospace;font-size:1.55rem;letter-spacing:3.8px;margin-bottom:6px;color:#4a9eff;text-shadow:0 0 18px rgba(74,158,255,.48)}
+.panel-content h2{font-family:'Orbitron',monospace;font-size:.82rem;letter-spacing:2.8px;color:#fff;margin-bottom:20px;font-weight:400;opacity:.58}
+
+.panel-content p{font-size:.94rem;line-height:1.65;color:#aaa;margin-bottom:12px}
+.panel-content strong{color:#fff}
+
+.tag{display:inline-block;padding:4px 11px;border:1px solid rgba(74,158,255,.38);border-radius:18px;font-size:.66rem;font-family:'Orbitron',monospace;color:#4a9eff;margin:2px 1px;transition:transform .1s, background .2s, border-color .2s;position:relative;overflow:hidden}
+.tag:hover{background:rgba(74,158,255,.11);box-shadow:0 0 13px rgba(74,158,255,.28);transform:translateY(-1.5px) scale(1.02)}
+.tag:active{transform:scale(0.93);background:rgba(74,158,255,.22)}
+
+.skills-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:10px}
+.sg{background:rgba(74,158,255,.045);border:1px solid rgba(74,158,255,.13);border-radius:7px;padding:12px;transition:all .26s}
+.sg:hover{border-color:rgba(74,158,255,.38);transform:translateY(-2px);box-shadow:0 4px 16px rgba(74,158,255,.09)}
+.sg h4{font-family:'Orbitron',monospace;font-size:.56rem;letter-spacing:1.8px;color:#4a9eff;margin-bottom:6px}
+
+.pcard{background:rgba(74,158,255,.03);border:1px solid rgba(74,158,255,.13);border-radius:7px;padding:12px;margin-bottom:9px;transition:transform .1s cubic-bezier(.2,1,.3,1), box-shadow .2s, border-color .2s;position:relative}
+.pcard:hover{border-color:rgba(74,158,255,.4);transform:translateY(-2.5px) scale(1.003);box-shadow:0 7px 24px rgba(0,0,0,.48), 0 0 0 1px rgba(74,158,255,.08) inset}
+.pcard:active{transform:translateY(-1px) scale(0.985)}
+.pcard h3{font-family:'Orbitron',monospace;font-size:.76rem;letter-spacing:1px;margin-bottom:5px;color:#fff}
+.pcard p{color:#888;font-size:.82rem;margin-bottom:7px}
+
+.titem{border-left:2px solid #4a9eff;padding:0 0 14px 15px;margin-bottom:12px;position:relative;transition:all .26s}
+.titem:hover{padding-left:18px}
+.titem::before{content:'';position:absolute;left:-4px;top:0;width:9px;height:9px;background:#000;border:2px solid #4a9eff;border-radius:50%;box-shadow:0 0 7px #4a9eff}
+.tyear{font-family:'Orbitron',monospace;font-size:.56rem;letter-spacing:2px;color:#4a9eff}
+.titem h3{font-family:'Orbitron',monospace;font-size:.76rem;margin:3px 0;color:#fff}
+.titem h4{font-size:.7rem;color:#888;margin-bottom:3px}
+
+.cblock{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;background:rgba(74,158,255,.045);border:1px solid rgba(74,158,255,.18);border-radius:5px;color:#ccc;text-decoration:none;font-size:.76rem;margin:2px;transition:transform .08s, box-shadow .16s, border-color .14s, background .14s}
+.cblock:hover{border-color:#4a9eff;color:#fff;box-shadow:0 0 13px rgba(74,158,255,.18);transform:translateY(-1.5px)}
+.cblock:active{transform:scale(0.95);background:rgba(74,158,255,.16)}
+
+.cv-btn{display:inline-flex;align-items:center;gap:5px;margin-top:14px;padding:9px 18px;border:1px solid #4a9eff;color:#4a9eff;text-decoration:none;font-family:'Orbitron',monospace;font-size:.66rem;letter-spacing:2px;border-radius:3px;transition:transform .1s cubic-bezier(.2,.9,.3,1), box-shadow .2s, background .2s, color .2s;background:rgba(0,0,0,.28)}
+.cv-btn:hover{background:#4a9eff;color:#000;box-shadow:0 0 24px rgba(74,158,255,.5);transform:translateY(-2px)}
+.cv-btn:active{transform:scale(0.93) translateY(0)}
+
+/* Click ripple (3D press feel) */
+.click-ripple{position:fixed;border:1px solid rgba(74,158,255,.58);border-radius:50%;pointer-events:none;z-index:45;mix-blend-mode:screen;animation:rippleExpand .58s ease-out forwards}
+@keyframes rippleExpand{0%{transform:translate(-50%,-50%) scale(.18);opacity:.88}100%{transform:translate(-50%,-50%) scale(3.1);opacity:0}}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#4a9eff;border-radius:2px}::-webkit-scrollbar-track{background:rgba(0,0,0,.5)}
+
+/* ========== MOBILE ========== */
+@media(max-width:768px){
+  .hud-label{font-size:.42rem}.hud-value{font-size:.62rem}.hud-top{padding:9px 13px}
+  .frame-left,.frame-right{width:46px}.planet-nav{right:58px;gap:11px}.pnav-btn{width:11px;height:11px}
+  .content-panel{width:96%;padding:17px;max-height:74vh}
+  .skills-grid{grid-template-columns:1fr}
+  .hud-info{flex-direction:column;align-items:flex-end;gap:5px}.speed-bar{width:74px}
+  .crosshair{width:54px;height:54px}.ch-ring.r1{width:20px;height:20px}.ch-ring.r2{width:34px;height:34px}
+  .cinematic-video{object-fit:cover}
+}
+
+/* Extra polish for hybrid video mode */
+#cockpit.planet-hover .ch-dot{box-shadow:0 0 24px #4a9eff,0 0 48px #00d4ff,0 0 78px rgba(0,212,255,.35);transform:translate(-50%,-50%) scale(1.12)}
+#cockpit.planet-hover .ch-ring{border-color:rgba(74,158,255,.52)}

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avinash Zala — 3D Systems Architect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+    <style>
+        /* Pure 3D from scratch — minimal overlays only */
+        :root { --accent:#3b82f6; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#05070a; color:#e2e8f0; font-family:'Inter',system-ui,sans-serif; overflow:hidden; }
+        #three-canvas { position:fixed; top:0; left:0; width:100%; height:100%; display:block; z-index:1; outline:none; }
+        .hud { position:fixed; z-index:10; font-size:12px; mix-blend-mode:difference; }
+        .nav { top:22px; left:24px; display:flex; gap:22px; }
+        .nav a { color:#fff; text-decoration:none; opacity:0.65; transition:0.2s; letter-spacing:0.5px; }
+        .nav a:hover, .nav a.active { opacity:1; color:#fff; }
+        .info { position:fixed; bottom:22px; left:24px; max-width:460px; background:rgba(5,7,10,0.92); border:1px solid #1f2937; padding:18px 20px; border-radius:4px; display:none; z-index:12; font-size:13px; line-height:1.45; }
+        .info.active { display:block; }
+        .info h3 { font-family:'Space Grotesk',sans-serif; font-size:15px; margin:0 0 6px; }
+        .hud-right { bottom:22px; right:24px; text-align:right; opacity:0.4; font-size:11px; }
+        .loading { position:fixed; inset:0; background:#05070a; display:flex; align-items:center; justify-content:center; flex-direction:column; z-index:100; }
+        .loading .bar { width:180px; height:1px; background:#111; margin-top:14px; }
+        .loading .bar > div { height:1px; background:#e2e8f0; width:0%; transition:width .2s linear; }
+        .reel-btn { position:fixed; bottom:22px; left:50%; transform:translateX(-50%); z-index:11; background:rgba(255,255,255,0.06); border:1px solid #334155; color:#e2e8f0; padding:8px 18px; font-size:11px; letter-spacing:1.5px; border-radius:999px; cursor:pointer; transition:0.2s; }
+        .reel-btn:hover { background:rgba(59,130,246,0.15); border-color:#3b82f6; }
+        #home-btn { left: calc(50% + 105px); padding: 5px 11px; font-size: 10px; }
+        .progress-dots { position:fixed; bottom:52px; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:10; }
+        .progress-dots div { width:3px; height:3px; background:#334155; border-radius:50%; transition:all .3s; }
+        .progress-dots div.active { background:#3b82f6; width:14px; border-radius:3px; }
+
+        /* Projected 3D labels */
+        .label-3d {
+            position: absolute;
+            font-size: 10px;
+            font-family: 'Inter', system-ui, sans-serif;
+            color: #e2e8f0;
+            background: rgba(5,7,10,0.75);
+            padding: 2px 7px;
+            border-radius: 2px;
+            white-space: nowrap;
+            pointer-events: none;
+            transform: translate(-50%, -100%);
+            border: 1px solid rgba(59,130,246,0.3);
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+            transition: opacity 120ms ease;
+        }
+        .label-3d.hidden { opacity: 0; }
+
+        /* ========== Mobile / touch optimizations ========== */
+        @media (max-width: 768px) {
+            .nav { top: 12px; left: 12px; gap: 14px; font-size: 10px; }
+            .nav a { opacity: 0.75; }
+            .hud-right { bottom: 12px; right: 12px; font-size: 9px; line-height: 1.3; }
+            .progress-dots { bottom: 42px; gap: 6px; }
+            .progress-dots div { width: 4px; height: 4px; }
+            .reel-btn { padding: 10px 14px; font-size: 10px; letter-spacing: 1px; }
+            #home-btn, #capture-btn, #copy-link-btn { display: none; } /* hide secondary buttons on small screens to reduce clutter */
+            .info { left: 10px; right: 10px; bottom: 10px; max-width: none; font-size: 12px; padding: 14px 16px; }
+            .label-3d { font-size: 9px; padding: 1px 5px; }
+            .loading .bar { width: 140px; }
+        }
+
+        @media (max-width: 480px) {
+            .nav { gap: 10px; }
+            .hud-right { font-size: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="three-canvas"></canvas>
+
+    <div class="hud nav">
+        <a href="#" id="nav-about" data-i="0">ABOUT</a>
+        <a href="#" id="nav-skills" data-i="1">SKILLS</a>
+        <a href="#" id="nav-projects" data-i="2">PROJECTS</a>
+        <a href="#" id="nav-experience" data-i="3">EXPERIENCE</a>
+        <a href="#" id="nav-lab" data-i="4">LAB</a>
+        <a href="#" id="nav-contact" data-i="5">CONTACT</a>
+        <a href="Resume/Resume.docx" download>CV</a>
+    </div>
+
+    <div class="hud hud-right">
+        <div id="current-station" style="font-size:10px; letter-spacing:1px; margin-bottom:2px; opacity:0.6;"></div>
+        DRAG/SWIPE TO ORBIT & FLY • TAP TO INSPECT<br>
+        AVINASH ZALA • SENIOR FULL STACK SYSTEMS
+    </div>
+
+    <button id="reel-btn" class="reel-btn">PLAY REEL</button>
+    <button id="home-btn" class="reel-btn" style="left: calc(50% + 110px); font-size:10px; padding:6px 12px;">HOME</button>
+    <button id="capture-btn" class="reel-btn" style="left: calc(50% - 110px); font-size:10px; padding:6px 12px;">CAPTURE</button>
+    <button id="copy-link-btn" class="reel-btn" style="left: calc(50% - 220px); font-size:10px; padding:6px 12px;">COPY LINK</button>
+
+    <div id="progress-dots" class="progress-dots"></div>
+
+    <div id="labels" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9;"></div>
+
+    <div id="info" class="info">
+        <div id="info-close" style="position:absolute; top:4px; right:8px; font-size:16px; line-height:1; cursor:pointer; opacity:0.6;">×</div>
+        <div id="info-title"></div>
+        <div id="info-body"></div>
+    </div>
+
+    <div id="loading" class="loading">
+        <div style="font-family:'Space Grotesk',sans-serif;letter-spacing:3px;font-size:17px;">AVINASH ZALA</div>
+        <div class="bar"><div id="load-bar"></div></div>
+        <div style="margin-top:8px;font-size:10px;opacity:0.5;letter-spacing:1px;">BUILDING IMMERSIVE 3D WORLD</div>
+    </div>
+
+    <script type="module" src="assets/js/main.js"></script>
+</body>
+</html>
