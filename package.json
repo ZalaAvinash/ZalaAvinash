@@ -1,7 +1,7 @@
 {
   "name": "me",
   "version": "1.0.0",
-  "description": "Avinash Zala — 3D Systems Architect Portfolio",
+  "description": "Avinash Zala — Senior Full-Stack Systems Architect Portfolio",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,8 +11,7 @@
   "keywords": [],
   "author": "Avinash Zala",
   "license": "MIT",
-  "dependencies": {
-    "three": "^0.184.0",
+  "devDependencies": {
     "vite": "^8.0.16"
   }
 }

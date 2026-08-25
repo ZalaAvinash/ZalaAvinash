@@ -4,14 +4,7 @@ export default defineConfig({
   root: '.',
   build: {
     outDir: 'dist',
-    assetsInlineLimit: 0,
-    rollupOptions: {
-      output: {
-        manualChunks: (id) => {
-          if (id.includes('node_modules/three')) return 'three';
-        }
-      }
-    }
+    assetsInlineLimit: 0
   },
   server: {
     port: 3000,

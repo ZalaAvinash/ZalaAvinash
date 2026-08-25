@@ -3,134 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avinash Zala — 3D Systems Architect</title>
-    <meta name="description" content="Avinash Zala — Senior .NET & Full-Stack Systems Architect. Immersive 3D portfolio of enterprise platforms, real-time systems, and cloud-native delivery.">
+    <title>Avinash Zala — Senior Full-Stack Systems Architect</title>
+    <meta name="description" content="Avinash Zala — Senior Full-Stack Systems Architect. Enterprise .NET, cloud-native platforms, real-time systems. 8+ years.">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Avinash Zala — 3D Systems Architect">
-    <meta property="og:description" content="Senior .NET & Full-Stack Systems Architect building high-scale, cloud-native platforms.">
+    <meta property="og:title" content="Avinash Zala — Senior Full-Stack Systems Architect">
+    <meta property="og:description" content="Senior Full-Stack Systems Architect building high-scale, cloud-native platforms.">
     <meta property="og:url" content="https://avinashzala.dev/">
     <meta name="twitter:card" content="summary_large_image">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
-    <link href="assets/css/style.css" rel="stylesheet">
-    <style>
-        /* Pure 3D from scratch — minimal overlays only */
-        :root { --accent:#3b82f6; }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { background:#05070a; color:#e2e8f0; font-family:'Inter',system-ui,sans-serif; overflow:hidden; }
-        #three-canvas { position:fixed; top:0; left:0; width:100%; height:100%; display:block; z-index:1; outline:none; }
-        .hud { position:fixed; z-index:10; font-size:12px; mix-blend-mode:difference; }
-        .nav { top:22px; left:24px; display:flex; gap:22px; }
-        .nav a { color:#fff; text-decoration:none; opacity:0.65; transition:0.2s; letter-spacing:0.5px; }
-        .nav a:hover, .nav a.active { opacity:1; color:#fff; }
-        .info { position:fixed; bottom:22px; left:24px; max-width:460px; background:rgba(5,7,10,0.92); border:1px solid #1f2937; padding:18px 20px; border-radius:4px; display:none; z-index:12; font-size:13px; line-height:1.45; }
-        .info.active { display:block; }
-        .info h3 { font-family:'Space Grotesk',sans-serif; font-size:15px; margin:0 0 6px; }
-        .hud-right { bottom:22px; right:24px; text-align:right; opacity:0.4; font-size:11px; }
-        .loading { position:fixed; inset:0; background:#05070a; display:flex; align-items:center; justify-content:center; flex-direction:column; z-index:100; }
-        .loading .bar { width:180px; height:1px; background:#111; margin-top:14px; }
-        .loading .bar > div { height:1px; background:#e2e8f0; width:0%; transition:width .2s linear; }
-        .reel-btn { position:fixed; bottom:22px; left:50%; transform:translateX(-50%); z-index:11; background:rgba(255,255,255,0.06); border:1px solid #334155; color:#e2e8f0; padding:8px 18px; font-size:11px; letter-spacing:1.5px; border-radius:999px; cursor:pointer; transition:0.2s; }
-        .reel-btn:hover { background:rgba(59,130,246,0.15); border-color:#3b82f6; }
-        #home-btn { left: calc(50% + 105px); padding: 5px 11px; font-size: 10px; }
-        .progress-dots { position:fixed; bottom:52px; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:10; }
-        .progress-dots div { width:3px; height:3px; background:#334155; border-radius:50%; transition:all .3s; }
-        .progress-dots div.active { background:#3b82f6; width:14px; border-radius:3px; }
-
-        /* Projected 3D labels */
-        .label-3d {
-            position: absolute;
-            font-size: 10px;
-            font-family: 'Inter', system-ui, sans-serif;
-            color: #e2e8f0;
-            background: rgba(5,7,10,0.75);
-            padding: 2px 7px;
-            border-radius: 2px;
-            white-space: nowrap;
-            pointer-events: none;
-            transform: translate(-50%, -100%);
-            border: 1px solid rgba(59,130,246,0.3);
-            letter-spacing: 0.5px;
-            opacity: 0.9;
-            transition: opacity 120ms ease;
-        }
-        .label-3d.hidden { opacity: 0; }
-
-        /* ========== Mobile / touch optimizations ========== */
-        @media (max-width: 768px) {
-            .nav { top: 12px; left: 12px; gap: 14px; font-size: 10px; }
-            .nav a { opacity: 0.75; }
-            .hud-right { bottom: 12px; right: 12px; font-size: 9px; line-height: 1.3; }
-            .progress-dots { bottom: 42px; gap: 6px; }
-            .progress-dots div { width: 4px; height: 4px; }
-            .reel-btn { padding: 10px 14px; font-size: 10px; letter-spacing: 1px; }
-            #home-btn, #capture-btn, #copy-link-btn { display: none; } /* hide secondary buttons on small screens to reduce clutter */
-            .info { left: 10px; right: 10px; bottom: 10px; max-width: none; font-size: 12px; padding: 14px 16px; }
-            .label-3d { font-size: 9px; padding: 1px 5px; }
-            .loading .bar { width: 140px; }
-
-            /* Mobile nav becomes a slide-in drawer; neutralise the inline flex+blend
-               so it reads cleanly over the solid panel. */
-            .hud.nav { mix-blend-mode: normal; opacity: 1; }
-            .nav a { color: #e2e8f0; }
-            .nav a.active { color: #fff; }
-        }
-
-        @media (max-width: 480px) {
-            .nav { gap: 10px; }
-            .hud-right { font-size: 8px; }
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <canvas id="three-canvas"></canvas>
-
-    <!-- Large editorial monogram watermark (branded atmosphere, behind content) -->
-    <div id="monogram" aria-hidden="true">AZ</div>
-
-    <!-- Mobile nav toggle -->
-    <button id="nav-toggle" class="nav-toggle" aria-label="Open navigation menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-    </button>
-
-    <nav class="hud nav" id="top-nav">
-        <a href="#" id="nav-about" data-i="0">ABOUT</a>
-        <a href="#" id="nav-skills" data-i="1">SKILLS</a>
-        <a href="#" id="nav-projects" data-i="2">PROJECTS</a>
-        <a href="#" id="nav-experience" data-i="3">EXPERIENCE</a>
-        <a href="#" id="nav-lab" data-i="4">LAB</a>
-        <a href="#" id="nav-contact" data-i="5">CONTACT</a>
-        <a href="Resume/Resume.docx" download>CV</a>
-    </nav>
-
-    <div class="hud hud-right">
-        <div id="current-station" style="font-size:10px; letter-spacing:1px; margin-bottom:2px; opacity:0.85; color:#cbd5e1;"></div>
-        <span style="opacity:0.9; color:#e2e8f0;">DRAG TO ORBIT • TAP TO INSPECT • SCROLL TO EXPLORE</span><br>
-        <span style="opacity:1; color:#fff; font-weight:600; letter-spacing:1px;">AVINASH ZALA • SENIOR FULL STACK SYSTEMS</span>
+    <!-- Ambient gradient backdrop -->
+    <div class="bg-orbs" aria-hidden="true">
+        <span class="orb orb-1"></span>
+        <span class="orb orb-2"></span>
+        <span class="orb orb-3"></span>
     </div>
 
-    <!-- 2D content panels: clean, readable content that fades in per section (Option A) -->
-    <div id="content-panels"></div>
+    <!-- Header / nav -->
+    <header class="site-header">
+        <a href="#top" class="brand">AZ<span>.</span></a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Open navigation" aria-expanded="false">
+            <span></span><span></span><span></span>
+        </button>
+        <nav class="site-nav" id="site-nav">
+            <a href="#about">About</a>
+            <a href="#skills">Skills</a>
+            <a href="#projects">Projects</a>
+            <a href="#experience">Experience</a>
+            <a href="#lab">Lab</a>
+            <a href="#contact">Contact</a>
+            <a href="Resume/Resume.docx" download class="nav-cta">CV ↓</a>
+        </nav>
+    </header>
 
-    <button id="reel-btn" class="reel-btn" aria-label="Play cinematic reel">PLAY REEL</button>
-    <button id="home-btn" class="reel-btn" style="left: calc(50% + 110px); font-size:10px; padding:6px 12px;" aria-label="Return to home section">HOME</button>
-    <button id="capture-btn" class="reel-btn" style="left: calc(50% - 110px); font-size:10px; padding:6px 12px;" aria-label="Capture screenshot of current view">CAPTURE</button>
-    <button id="copy-link-btn" class="reel-btn" style="left: calc(50% - 220px); font-size:10px; padding:6px 12px;" aria-label="Copy deep link to current view">COPY LINK</button>
+    <main id="top">
+        <!-- HERO -->
+        <section class="hero" id="hero">
+            <div class="hero-inner reveal">
+                <p class="eyebrow">Senior Full-Stack Systems Architect</p>
+                <h1 class="hero-name" id="hero-name">Avinash Zala</h1>
+                <p class="hero-tagline" id="hero-tagline"></p>
+                <div class="hero-actions">
+                    <a href="#projects" class="btn btn-primary">View Work</a>
+                    <a href="#contact" class="btn btn-ghost">Get in touch</a>
+                </div>
+                <ul class="hero-stats" id="hero-stats"></ul>
+            </div>
+        </section>
 
-    <div id="progress-dots" class="progress-dots"></div>
+        <!-- ABOUT -->
+        <section class="section" id="about">
+            <div class="container">
+                <p class="eyebrow reveal">About</p>
+                <h2 class="section-title reveal" id="about-heading"></h2>
+                <div class="about-grid">
+                    <div class="about-body reveal" id="about-body"></div>
+                    <aside class="about-tags reveal" id="about-tags"></aside>
+                </div>
+            </div>
+        </section>
 
-    <div id="labels" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9;"></div>
+        <!-- SKILLS -->
+        <section class="section section-alt" id="skills">
+            <div class="container">
+                <p class="eyebrow reveal">Skills</p>
+                <h2 class="section-title reveal">Engineering Toolkit</h2>
+                <p class="section-lead reveal">Depth across the full stack, with a bias toward backend architecture and cloud delivery.</p>
+                <div class="skills-grid reveal" id="skills-grid"></div>
+            </div>
+        </section>
 
-    <div id="info" class="info">
-        <div id="info-close" style="position:absolute; top:4px; right:8px; font-size:16px; line-height:1; cursor:pointer; opacity:0.6;">×</div>
-        <div id="info-title"></div>
-        <div id="info-body"></div>
-    </div>
+        <!-- PROJECTS -->
+        <section class="section" id="projects">
+            <div class="container">
+                <p class="eyebrow reveal">Selected Work</p>
+                <h2 class="section-title reveal">Projects</h2>
+                <p class="section-lead reveal">Enterprise platforms built for scale, speed, and reliability.</p>
+                <div class="projects-grid reveal" id="projects-grid"></div>
+            </div>
+        </section>
 
-    <div id="loading" class="loading">
-        <div style="font-family:'Space Grotesk',sans-serif;letter-spacing:3px;font-size:17px;">AVINASH ZALA</div>
-        <div class="bar"><div id="load-bar"></div></div>
-        <div style="margin-top:8px;font-size:10px;opacity:0.5;letter-spacing:1px;">BUILDING IMMERSIVE 3D WORLD</div>
-    </div>
+        <!-- EXPERIENCE -->
+        <section class="section section-alt" id="experience">
+            <div class="container">
+                <p class="eyebrow reveal">Career</p>
+                <h2 class="section-title reveal">Experience</h2>
+                <div class="timeline reveal" id="timeline"></div>
+            </div>
+        </section>
+
+        <!-- LAB -->
+        <section class="section" id="lab">
+            <div class="container">
+                <p class="eyebrow reveal">Lab</p>
+                <h2 class="section-title reveal">How I Work</h2>
+                <div class="process-grid reveal" id="process-grid"></div>
+                <div class="testimonials reveal" id="testimonials"></div>
+            </div>
+        </section>
+
+        <!-- CONTACT -->
+        <section class="section section-alt" id="contact">
+            <div class="container contact-inner">
+                <p class="eyebrow reveal">Contact</p>
+                <h2 class="section-title reveal">Let's Build</h2>
+                <p class="section-lead reveal">Available for senior engineering and architecture work. Reach out directly.</p>
+                <div class="contact-cards reveal" id="contact-cards"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <span>© <span id="year"></span> Avinash Zala</span>
+            <span class="footer-meta">Built with care · Surat, India</span>
+        </div>
+    </footer>
 
     <script type="module" src="assets/js/main.js"></script>
 </body>

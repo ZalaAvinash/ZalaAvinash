@@ -1,83 +1,50 @@
-# Portfolio — 3D Systems Architect
+# Portfolio — Avinash Zala
 
-**Pure Three.js 3D immersive portfolio** built from scratch. Camera travels a spline journey through your work as you scroll. Drag to orbit, click objects to inspect with real data.
+A clean, content-first **editorial / glassmorphism** single-page portfolio for a Senior Full-Stack Systems Architect. Built with vanilla JS (ES modules) + Vite, no framework, no 3D.
 
 ---
 
 ## What It Is
 
-A single-page 3D experience with:
-- **6 sections**: About, Skills, Projects, Experience, Lab, Contact
-- **3D hero architecture** with animated layers (UI, API, Domain, Data, Cloud)
-- **Skills constellation** with layered glowing orbs and data links
-- **Project gallery** with HD texture planes, 3D frames, orbiting tech nodes
-- **Experience path** with 3D monolith milestones and floating testimonials
-- **Interactive lab** with mouse-driven particle system
-- **Bidirectional knowledge graph**: hover a skill → highlights related projects (and vice versa)
-- **Architecture Explorer**: click hero layers to see cross-world connections
-- **Subtle ambient audio**: data flows, inspect tones, soft drone
-- **Deep linking**: `?p=0.42` or `?at=projects`
-- **"Play Reel"** cinematic auto-tour
-- **View capture** and **copy link** for sharing
+A fast, accessible, responsive portfolio with:
 
----
+- **Hero** — name, role, tagline, and key stats
+- **About** — narrative + competency tags
+- **Skills** — proficiency bars grouped by Frontend / Backend / Cloud / Data
+- **Projects** — responsive card grid with real imagery, tech tags, impact
+- **Experience** — vertical timeline
+- **Lab** — process steps + client testimonials
+- **Contact** — email / phone / LinkedIn / CV cards
 
 ## Tech Stack
 
-- **Three.js** — WebGL 3D rendering
-- **Vite** — build/dev tooling (bundling, asset hashing, dev server)
-- **Vanilla JS (ES modules)** — no UI frameworks
-- **CSS** — minimal overlay styling only
-
----
-
-## Controls
-
-| Action | Input |
-|--------|-------|
-| Navigate | Scroll / arrow keys / swipe |
-| Orbit | Drag canvas |
-| Inspect | Click object |
-| Jump to section | Top nav / bottom dots |
-| Play auto-reel | `R` key or PLAY REEL button |
-| Close info panel | Click panel / `Escape` |
-| Capture screenshot | CAPTURE button |
-| Copy deep link | COPY LINK button |
-
----
+- **Vite** — build & dev tooling
+- **Vanilla JS (ES modules)** — no UI framework
+- **CSS** — custom design system (light editorial base, glass cards, reveal animations)
+- **Google Fonts** — Inter + Space Grotesk
 
 ## Project Structure
 
 ```
-index.html                    — Single HTML file with inline CSS
+index.html              — Page structure + meta/OG tags
 assets/
-  css/style.css               — Overlay CSS
+  css/style.css         — Full design system
   js/
-    main.js                   — Entry point
-    app.js                    — Portfolio orchestrator
-    data.js                   — Skills, projects, experience data
-    scene.js                  — Three.js renderer, camera, lights
-    modules/
-      hero.js                 — Hero section (architecture layers)
-      skills.js               — Skills constellation
-      projects.js             — Project gallery
-      experience.js           — Experience path
-      lab.js                  — Interactive lab particles
-      contact.js              — Contact section
-      environment.js          — Ambient environment
-      journey.js              — Journey trail
-      audio-engine.js         — Subtle ambient audio
-      interaction-handler.js  — Mouse/touch interactions
-      ui-manager.js           — UI labels, progress dots, info panels
-      reel-player.js          — Cinematic auto-tour
-  images/                     — HD textures + profile photo
-Resume/Resume.docx            — Downloadable CV
+    main.js             — Renders sections from data, nav, scroll-reveal, deep-link
+    data.js             — All content (single source of truth)
+public/
+  images/               — Project + profile imagery (served at /images/*)
+Resume/Resume.docx      — Downloadable CV
 ```
 
----
+## Features
 
-## Browser Compatibility
+- **Responsive** — mobile hamburger drawer, fluid type, breakpoints at 768/520px
+- **Scroll reveal** — IntersectionObserver fade/slide-ins
+- **Active nav** — highlights the section in view
+- **Deep link** — `?at=projects` scrolls to a section on load
+- **Accessible** — semantic landmarks, aria labels, `prefers-reduced-motion` support
 
-- Modern browsers with WebGL support
-- Chrome/Edge recommended for best performance
-- Touch devices supported with optimized controls
+## Browser Support
+
+Modern evergreen browsers (Chrome, Edge, Firefox, Safari). No WebGL required.
