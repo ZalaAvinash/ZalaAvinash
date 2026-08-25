@@ -27,6 +27,19 @@ function animateCount(el, target) {
   requestAnimationFrame(tick);
 }
 
+function renderHeroVisual(d) {
+  const hv = $('#hero-visual');
+  if (!hv) return;
+  const code = (d.hero.code || []).map(t => `<span class="tk-${t.c}">${esc(t.t)}</span>`).join('');
+  const stack = (d.hero.stack || []).map(s => `<span>${esc(s)}</span>`).join('');
+  hv.innerHTML = `
+    <div class="code-card">
+      <div class="code-bar"><span></span><span></span><span></span><em>OrderService.cs</em></div>
+      <pre class="code-body"><code>${code}</code></pre>
+      <div class="code-stack">${stack}</div>
+    </div>`;
+}
+
 function renderHero(d) {
   $('#hero-name').textContent = d.hero.name;
   $('#hero-tagline').textContent = d.hero.tagline;
@@ -175,6 +188,7 @@ function applyDeepLink() {
 function init() {
   try {
     renderHero(portfolioData);
+    renderHeroVisual(portfolioData);
     renderAbout(portfolioData);
     renderSkills(portfolioData);
     renderProjects(portfolioData);

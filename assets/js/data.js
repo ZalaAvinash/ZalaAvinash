@@ -16,7 +16,22 @@ export const portfolioData = {
       { value: '100k+', label: 'Daily transactions' },
       { value: '12', label: 'Systems modernized' },
       { value: '99.99%', label: 'Uptime delivered' }
-    ]
+    ],
+    code: [
+      { c: 'k', t: 'public class' }, { c: 't', t: ' OrderService' },
+      { c: 'p', t: ' {' },
+      { c: 'd', t: '  [HttpPost("api/orders")]' },
+      { c: 'k', t: '  public async Task' }, { c: 't', t: '<IActionResult>' }, { c: 'p', t: ' Create' },
+      { c: 'p', t: '(' }, { c: 't', t: 'OrderDto' }, { c: 'i', t: ' dto' }, { c: 'p', t: ')' },
+      { c: 'p', t: '  {' },
+      { c: 'i', t: '    var' }, { c: 'i', t: ' order' }, { c: 'p', t: ' = ' }, { c: 'k', t: 'await' }, { c: 'i', t: ' _repo' }, { c: 'p', t: '.SaveAsync(' }, { c: 'i', t: 'dto' }, { c: 'p', t: ');' },
+      { c: 'i', t: '    await' }, { c: 'i', t: ' _bus' }, { c: 'p', t: '.PublishAsync(' },
+      { c: 'i', t: 'new' }, { c: 'i', t: ' OrderPlaced' }, { c: 'p', t: '(order.Id));' },
+      { c: 'i', t: '    return' }, { c: 't', t: ' Ok' }, { c: 'p', t: '(order);' },
+      { c: 'p', t: '  }' },
+      { c: 'p', t: '}' }
+    ],
+    stack: ['.NET Core', 'Angular', 'SignalR', 'Docker', 'K8s', 'Azure']
   },
 
   about: {
@@ -41,11 +56,11 @@ export const portfolioData = {
   ],
 
   projects: [
-    { id: 0, title: 'AIRIS Enterprise ERP', client: 'Aether Industries', impact: '70% faster deployments • Modernized from .NET 4.5 legacy', tech: ['.NET Core', 'Angular', 'Docker', 'Kubernetes'], desc: 'Full platform modernization. PRM module, real-time dashboards, container orchestration. 100k+ daily transactions now stable.', image: '/images/1.jpg', accent: '#2563eb', span: 'tall', link: '#' },
-    { id: 1, title: 'Insurance Portal Platform', client: 'Major Insurer', impact: '40k monthly users • 100% test coverage', tech: ['ASP.NET', 'MSSQL', 'HelloSign', 'Stripe'], desc: 'High-traffic customer portal. E-signature flows, payments, policy management. Zero downtime releases for 3 years.', image: '/images/2.jpg', accent: '#06b6d4', span: 'short', link: '#' },
-    { id: 2, title: 'Twitter Intelligence Engine', client: 'Internal Platform', impact: 'Executive dashboards • Real-time sentiment', tech: ['.NET Core', 'React', 'OpenAI', 'SignalR'], desc: 'Chrome extension + backend that turns Twitter into actionable intelligence. Featured for C-level reporting.', image: '/images/3.jpg', accent: '#7c3aed', span: 'short', link: '#' },
-    { id: 3, title: 'Real-time Trading Platform', client: 'Fintech Scale-up', impact: '<50ms latency @ 10k concurrent', tech: ['Angular', '.NET Core', 'Azure', 'Redis', 'SignalR'], desc: 'Low-latency trading terminal and matching engine. Sub-50ms roundtrips with full audit trail.', image: '/images/4.jpg', accent: '#059669', span: 'tall', link: '#' },
-    { id: 4, title: 'Legacy → Cloud Migration', client: 'Manufacturing Enterprise', impact: '40% infra cost reduction • 99.99% uptime', tech: ['ASP.NET', 'Docker', 'Kubernetes', 'Terraform'], desc: 'Moved 12-year-old monolith to cloud-native. Zero-downtime cutover with feature flags and canary deploys.', image: '/images/1.jpg', accent: '#db2777', span: 'short', link: '#' }
+    { id: 0, title: 'AIRIS Enterprise ERP', client: 'Aether Industries', impact: '70% faster deployments • Modernized from .NET 4.5 legacy', tech: ['.NET Core', 'Angular', 'Docker', 'Kubernetes'], desc: 'Full platform modernization. PRM module, real-time dashboards, container orchestration. 100k+ daily transactions now stable.', image: '/images/proj_1.jpg', accent: '#2563eb', span: 'tall', link: '#' },
+    { id: 1, title: 'Insurance Portal Platform', client: 'Major Insurer', impact: '40k monthly users • 100% test coverage', tech: ['ASP.NET', 'MSSQL', 'HelloSign', 'Stripe'], desc: 'High-traffic customer portal. E-signature flows, payments, policy management. Zero downtime releases for 3 years.', image: '/images/proj_2.jpg', accent: '#06b6d4', span: 'short', link: '#' },
+    { id: 2, title: 'Twitter Intelligence Engine', client: 'Internal Platform', impact: 'Executive dashboards • Real-time sentiment', tech: ['.NET Core', 'React', 'OpenAI', 'SignalR'], desc: 'Chrome extension + backend that turns Twitter into actionable intelligence. Featured for C-level reporting.', image: '/images/proj_3.jpg', accent: '#7c3aed', span: 'short', link: '#' },
+    { id: 3, title: 'Real-time Trading Platform', client: 'Fintech Scale-up', impact: '<50ms latency @ 10k concurrent', tech: ['Angular', '.NET Core', 'Azure', 'Redis', 'SignalR'], desc: 'Low-latency trading terminal and matching engine. Sub-50ms roundtrips with full audit trail.', image: '/images/proj_4.jpg', accent: '#059669', span: 'tall', link: '#' },
+    { id: 4, title: 'Legacy → Cloud Migration', client: 'Manufacturing Enterprise', impact: '40% infra cost reduction • 99.99% uptime', tech: ['ASP.NET', 'Docker', 'Kubernetes', 'Terraform'], desc: 'Moved 12-year-old monolith to cloud-native. Zero-downtime cutover with feature flags and canary deploys.', image: '/images/proj_5.jpg', accent: '#db2777', span: 'short', link: '#' }
   ],
 
   experience: [
