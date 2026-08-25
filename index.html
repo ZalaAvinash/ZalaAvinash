@@ -67,6 +67,12 @@
             .info { left: 10px; right: 10px; bottom: 10px; max-width: none; font-size: 12px; padding: 14px 16px; }
             .label-3d { font-size: 9px; padding: 1px 5px; }
             .loading .bar { width: 140px; }
+
+            /* Mobile nav becomes a slide-in drawer; neutralise the inline flex+blend
+               so it reads cleanly over the solid panel. */
+            .hud.nav { mix-blend-mode: normal; opacity: 1; }
+            .nav a { color: #e2e8f0; }
+            .nav a.active { color: #fff; }
         }
 
         @media (max-width: 480px) {
@@ -78,10 +84,15 @@
 <body>
     <canvas id="three-canvas"></canvas>
 
-    <!-- Large editorial monogram watermark (pure atmosphere, sits behind content) -->
+    <!-- Large editorial monogram watermark (branded atmosphere, behind content) -->
     <div id="monogram" aria-hidden="true">AZ</div>
 
-    <div class="hud nav">
+    <!-- Mobile nav toggle -->
+    <button id="nav-toggle" class="nav-toggle" aria-label="Open navigation menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+    </button>
+
+    <nav class="hud nav" id="top-nav">
         <a href="#" id="nav-about" data-i="0">ABOUT</a>
         <a href="#" id="nav-skills" data-i="1">SKILLS</a>
         <a href="#" id="nav-projects" data-i="2">PROJECTS</a>
@@ -89,7 +100,7 @@
         <a href="#" id="nav-lab" data-i="4">LAB</a>
         <a href="#" id="nav-contact" data-i="5">CONTACT</a>
         <a href="Resume/Resume.docx" download>CV</a>
-    </div>
+    </nav>
 
     <div class="hud hud-right">
         <div id="current-station" style="font-size:10px; letter-spacing:1px; margin-bottom:2px; opacity:0.85; color:#cbd5e1;"></div>

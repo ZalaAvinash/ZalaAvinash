@@ -9,7 +9,7 @@ export function createHeroSection({ textures, profileTexture, interactiveObjects
   // Living core with ShaderMaterial
   const coreGeo = new THREE.TorusKnotGeometry(2.6, 0.68, 220, 18, 2, 5);
   const coreMat = new THREE.ShaderMaterial({
-    uniforms: { time: { value: 0 }, baseColor: { value: new THREE.Color(0x0f1624) }, emissiveColor: { value: new THREE.Color(0x1e3a5f) } },
+    uniforms: { time: { value: 0 }, baseColor: { value: new THREE.Color(0x12233f) }, emissiveColor: { value: new THREE.Color(0x3b82f6) } },
     vertexShader: `
       uniform float time; varying vec3 vNormal; varying vec3 vPos;
       void main() { vNormal = normal; vec3 pos = position;
@@ -19,9 +19,9 @@ export function createHeroSection({ textures, profileTexture, interactiveObjects
     fragmentShader: `
       uniform float time; uniform vec3 baseColor; uniform vec3 emissiveColor;
       varying vec3 vNormal; varying vec3 vPos;
-      void main() { float pulse = 0.6 + sin(time * 2.4) * 0.35 + cos(time * 1.6 + vPos.x) * 0.2;
-        vec3 col = mix(baseColor, emissiveColor, pulse * 0.7);
-        float rim = pow(1.0 - abs(dot(vNormal, vec3(0.0,0.0,1.0))), 2.0); col += rim * 0.25;
+      void main() { float pulse = 0.75 + sin(time * 2.4) * 0.35 + cos(time * 1.6 + vPos.x) * 0.2;
+        vec3 col = mix(baseColor, emissiveColor, pulse * 0.85);
+        float rim = pow(1.0 - abs(dot(normalize(vNormal), vec3(0.0,0.0,1.0))), 1.6); col += rim * 0.6;
         gl_FragColor = vec4(col, 1.0); }
     `
   });
@@ -80,7 +80,7 @@ export function createHeroSection({ textures, profileTexture, interactiveObjects
   const p1 = isMobile ? 140 : 380;
   const p2 = isMobile ? 80 : 220;
   addParticleSystem(group, p1, { spread: 22, speed: 0.018, color: 0x3b82f6 }, 'data-flow');
-  addParticleSystem(group, p2, { spread: 14, speed: 0.026, color: 0x22c55e }, 'data-flow');
+  addParticleSystem(group, p2, { spread: 14, speed: 0.026, color: 0x22d3ee }, 'data-flow');
   createAnimatedConnections(group, layerDefs.map(l => l.pos));
 
   return group;

@@ -144,8 +144,19 @@ export class PortfolioExperience {
       if (homeBtn) homeBtn.addEventListener('click', () => this.flyTo(0));
       const captureBtn = document.getElementById('capture-btn');
       if (captureBtn) captureBtn.addEventListener('click', () => this.captureView());
-      const copyBtn = document.getElementById('copy-link-btn');
-      if (copyBtn) copyBtn.addEventListener('click', () => this.copyViewLink());
+      // Mobile nav drawer toggle
+      const navToggle = document.getElementById('nav-toggle');
+      const topNav = document.getElementById('top-nav');
+      if (navToggle && topNav) {
+        const setOpen = (open) => {
+          topNav.classList.toggle('open', open);
+          navToggle.setAttribute('aria-expanded', String(open));
+          navToggle.setAttribute('aria-label', open ? 'Close navigation menu' : 'Open navigation menu');
+        };
+        navToggle.addEventListener('click', () => setOpen(!topNav.classList.contains('open')));
+        // Close the drawer whenever a nav item is chosen
+        topNav.querySelectorAll('a[data-i]').forEach(a => a.addEventListener('click', () => setOpen(false)));
+      }
 
       this._deepLinkApplied = this.applyDeepLink();
       this.animate();
