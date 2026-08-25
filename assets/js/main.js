@@ -9,12 +9,41 @@ const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
 function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
+function animateCount(el, target) {
+  // preserve non-numeric prefix/suffix (e.g. "8+", "100k+", "99.99%")
+  const m = String(target).match(/^(\D*)([\d.]+)(\D*)$/);
+  if (!m) { el.textContent = target; return; }
+  const [, pre, num, post] = m;
+  const end = parseFloat(num);
+  const decimals = (num.split('.')[1] || '').length;
+  const dur = 1100; const t0 = performance.now();
+  const tick = (now) => {
+    const p = Math.min(1, (now - t0) / dur);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const cur = (end * eased).toFixed(decimals);
+    el.textContent = pre + cur + post;
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
 function renderHero(d) {
   $('#hero-name').textContent = d.hero.name;
   $('#hero-tagline').textContent = d.hero.tagline;
   $('#hero-stats').innerHTML = d.hero.stats
-    .map(s => `<li><span class="v">${esc(s.value)}</span><span class="l">${esc(s.label)}</span></li>`)
+    .map(s => `<li data-v="${esc(s.value)}"><span class="v">${esc(s.value)}</span><span class="l">${esc(s.label)}</span></li>`)
     .join('');
+  // count-up when hero reveal triggers
+  const hero = $('#hero');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        $$('#hero-stats li').forEach(li => animateCount(li.querySelector('.v'), li.dataset.v));
+        io.disconnect();
+      }
+    });
+  }, { threshold: 0.3 });
+  io.observe(hero);
 }
 
 function renderAbout(d) {
@@ -40,7 +69,7 @@ function renderSkills(d) {
 
 function renderProjects(d) {
   $('#projects-grid').innerHTML = d.projects.map(p => `
-    <article class="project-card">
+    <article class="project-card ${p.span || ''}" style="--pc-accent:${esc(p.accent || '#2563eb')}">
       <div class="project-media"><img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy"></div>
       <div class="project-body">
         <h3>${esc(p.title)}</h3>
