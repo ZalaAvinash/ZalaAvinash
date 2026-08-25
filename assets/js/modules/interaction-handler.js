@@ -25,6 +25,7 @@ export class InteractionHandler {
     window.addEventListener('wheel', e => {
       const reel = this.exp.reelPlayer && this.exp.reelPlayer.reelPlaying;
       if (reel) return;
+      this.exp.exitInspect(); // scrolling away from a focused object leaves inspect mode
       this.exp.targetProgress = Math.max(0, Math.min(1, this.exp.targetProgress + e.deltaY * 0.00048));
       this.lastInteraction = Date.now();
       e.preventDefault();
@@ -34,6 +35,9 @@ export class InteractionHandler {
       this.isDragging = true;
       this.dragStart.x = e.clientX;
       this.dragStart.y = e.clientY;
+      this._downX = e.clientX;        // anchor for click-vs-drag detection
+      this._downY = e.clientY;
+      this._dragMoved = false;
       this.lastInteraction = Date.now();
       this.resetHover();
     });
@@ -50,6 +54,8 @@ export class InteractionHandler {
         this.exp.targetOrbit.y += dx;
         this.dragStart.x = e.clientX;
         this.dragStart.y = e.clientY;
+        this.exp.exitInspect(); // orbiting away from a focused object leaves inspect mode
+        if (this._downX !== undefined && Math.hypot(e.clientX - this._downX, e.clientY - this._downY) > 6) this._dragMoved = true;
       }
       this.lastInteraction = Date.now();
     });
@@ -57,6 +63,8 @@ export class InteractionHandler {
     c.addEventListener('click', e => {
       const reel = this.exp.reelPlayer && this.exp.reelPlayer.reelPlaying;
       if (!reel) {
+        // Suppress inspect if the pointer actually dragged (orbit), not a clean click.
+        if (this._dragMoved) { this._dragMoved = false; return; }
         this.raycastAndInspect(e);
         this.lastInteraction = Date.now();
       }
@@ -94,14 +102,16 @@ export class InteractionHandler {
       this.exp.targetProgress = Math.max(0, Math.min(1, this.exp.targetProgress - (touch.clientY - this.dragStart.y) * 0.0022));
       this.dragStart.x = touch.clientX;
       this.dragStart.y = touch.clientY;
+      this.exp.exitInspect(); // swiping away from a focused object leaves inspect mode
       this.lastInteraction = Date.now();
       e.preventDefault();
     }, { passive: false });
 
     // Keyboard
     window.addEventListener('keydown', e => {
-      if (e.key === 'ArrowRight' || e.key === 'd') this.exp.targetProgress = Math.min(1, this.exp.targetProgress + 0.035);
-      if (e.key === 'ArrowLeft' || e.key === 'a') this.exp.targetProgress = Math.max(0, this.exp.targetProgress - 0.035);
+      if (e.repeat) return; // ignore OS key auto-repeat
+      if (e.key === 'ArrowRight' || e.key === 'd') { this.exp.exitInspect(); this.exp.targetProgress = Math.min(1, this.exp.targetProgress + 0.035); }
+      if (e.key === 'ArrowLeft' || e.key === 'a') { this.exp.exitInspect(); this.exp.targetProgress = Math.max(0, this.exp.targetProgress - 0.035); }
       if (e.key.toLowerCase() === 'r') this.exp.playReel();
       if (e.key === 'Escape') this.exp.closeInfo();
     });
@@ -114,7 +124,10 @@ export class InteractionHandler {
 
     document.addEventListener('visibilitychange', () => {
       this.exp.paused = document.hidden;
-      if (!this.exp.paused) this.exp.animate();
+      // NOTE: we do NOT call this.exp.animate() here. requestAnimationFrame
+      // already auto-pauses while the tab is hidden and resumes on its own
+      // when the tab becomes visible, so re-calling animate() would spawn a
+      // second parallel RAF loop. Setting `paused` is enough.
     });
 
     // Nav clicks

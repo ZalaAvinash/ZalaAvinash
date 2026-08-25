@@ -1,6 +1,6 @@
 # Hi, I'm Avinash Zala 👋
 
-**Senior .NET & Full-Stack Engineer | AI Integration | 7+ years**
+**Senior .NET & Full-Stack Engineer | AI Integration | 8+ years**
 
 I build enterprise web apps, APIs, and ERP systems — and I'm currently adding AI/LLM capabilities to my stack. Based in Surat, India. Open to remote opportunities.
 

@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Avinash Zala — 3D Systems Architect</title>
+    <meta name="description" content="Avinash Zala — Senior .NET & Full-Stack Systems Architect. Immersive 3D portfolio of enterprise platforms, real-time systems, and cloud-native delivery.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Avinash Zala — 3D Systems Architect">
+    <meta property="og:description" content="Senior .NET & Full-Stack Systems Architect building high-scale, cloud-native platforms.">
+    <meta property="og:url" content="https://avinashzala.dev/">
+    <meta name="twitter:card" content="summary_large_image">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
     <style>
@@ -72,6 +78,9 @@
 <body>
     <canvas id="three-canvas"></canvas>
 
+    <!-- Large editorial monogram watermark (pure atmosphere, sits behind content) -->
+    <div id="monogram" aria-hidden="true">AZ</div>
+
     <div class="hud nav">
         <a href="#" id="nav-about" data-i="0">ABOUT</a>
         <a href="#" id="nav-skills" data-i="1">SKILLS</a>
@@ -83,15 +92,18 @@
     </div>
 
     <div class="hud hud-right">
-        <div id="current-station" style="font-size:10px; letter-spacing:1px; margin-bottom:2px; opacity:0.6;"></div>
-        DRAG/SWIPE TO ORBIT & FLY • TAP TO INSPECT<br>
-        AVINASH ZALA • SENIOR FULL STACK SYSTEMS
+        <div id="current-station" style="font-size:10px; letter-spacing:1px; margin-bottom:2px; opacity:0.85; color:#cbd5e1;"></div>
+        <span style="opacity:0.9; color:#e2e8f0;">DRAG TO ORBIT • TAP TO INSPECT • SCROLL TO EXPLORE</span><br>
+        <span style="opacity:1; color:#fff; font-weight:600; letter-spacing:1px;">AVINASH ZALA • SENIOR FULL STACK SYSTEMS</span>
     </div>
 
-    <button id="reel-btn" class="reel-btn">PLAY REEL</button>
-    <button id="home-btn" class="reel-btn" style="left: calc(50% + 110px); font-size:10px; padding:6px 12px;">HOME</button>
-    <button id="capture-btn" class="reel-btn" style="left: calc(50% - 110px); font-size:10px; padding:6px 12px;">CAPTURE</button>
-    <button id="copy-link-btn" class="reel-btn" style="left: calc(50% - 220px); font-size:10px; padding:6px 12px;">COPY LINK</button>
+    <!-- 2D content panels: clean, readable content that fades in per section (Option A) -->
+    <div id="content-panels"></div>
+
+    <button id="reel-btn" class="reel-btn" aria-label="Play cinematic reel">PLAY REEL</button>
+    <button id="home-btn" class="reel-btn" style="left: calc(50% + 110px); font-size:10px; padding:6px 12px;" aria-label="Return to home section">HOME</button>
+    <button id="capture-btn" class="reel-btn" style="left: calc(50% - 110px); font-size:10px; padding:6px 12px;" aria-label="Capture screenshot of current view">CAPTURE</button>
+    <button id="copy-link-btn" class="reel-btn" style="left: calc(50% - 220px); font-size:10px; padding:6px 12px;" aria-label="Copy deep link to current view">COPY LINK</button>
 
     <div id="progress-dots" class="progress-dots"></div>
 

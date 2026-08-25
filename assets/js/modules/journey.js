@@ -42,6 +42,7 @@ export function createJourneyTrail(cameraPath, isMobile = false) {
     divisions,
     head: headGroup,
     particlePositions: trailPos,
+    trailCount,            // number of trailing particles (varies on mobile)
     trailParticles,
     explorerTrailFlows: [],
     explorerTargets: []
@@ -63,9 +64,10 @@ export function updateJourneyTrail(journeyData, progress, time, delta) {
   }
 
   // Update trailing particles
-  if (journeyData.particlePositions && journeyData.points) {
-    for (let i = 0; i < 65; i++) {
-      const sampleT = Math.max(0, p - (i / 65) * 0.09);
+  if (journeyData.particlePositions && journeyData.points && journeyData.trailCount) {
+    const count = journeyData.trailCount;
+    for (let i = 0; i < count; i++) {
+      const sampleT = Math.max(0, p - (i / count) * 0.09);
       const pt = journeyData.curve.getPointAt(sampleT);
       const i3 = i * 3;
       journeyData.particlePositions[i3] = pt.x;

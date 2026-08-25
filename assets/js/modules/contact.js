@@ -2,19 +2,21 @@
  * CONTACT SECTION — Nexus sphere, action planes, particles.
  */
 import * as THREE from 'three';
+import { portfolioData } from '../data.js';
 
 export function createContactSection({ interactiveObjects, addParticleSystem, isMobile = false }) {
   const group = new THREE.Group();
   group.position.set(0, 0, -130);
 
+  const c = portfolioData.contact;
   const nexus = new THREE.Mesh(new THREE.SphereGeometry(2.4, 36, 36), new THREE.MeshPhongMaterial({ color: 0x0f1624, emissive: 0x1e3a5f, emissiveIntensity: 0.8, shininess: 100 }));
   nexus.userData = { type: 'nexus', title: "LET'S BUILD", body: 'Ready for ambitious enterprise systems. Reach out.' };
   group.add(nexus); interactiveObjects.push(nexus);
 
   const actions = [
-    { label: 'EMAIL', action: 'mailto:avinashzala@outlook.com', desc: 'avinashzala@outlook.com' },
+    { label: 'EMAIL', action: 'mailto:' + c.email, desc: c.email },
     { label: 'DOWNLOAD CV', action: 'download', desc: 'Resume.docx' },
-    { label: 'CALL', action: 'tel:+917405120804', desc: '+91 74051 20804' }
+    { label: 'CALL', action: c.phoneHref, desc: c.phone }
   ];
   actions.forEach((a, i) => {
     const pl = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 2.1), new THREE.MeshPhongMaterial({ color: 0x111827, emissive: 0x1e3a5f, shininess: 40, side: THREE.DoubleSide }));

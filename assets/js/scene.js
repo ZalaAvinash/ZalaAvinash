@@ -13,7 +13,10 @@ export function createScene(canvas, isMobile = false) {
     canvas,
     antialias: !isMobile, // save a bit on mobile
     alpha: false,
-    powerPreference: 'high-performance'
+    powerPreference: 'high-performance',
+    // Keep the last rendered frame in the drawing buffer so CAPTURE (toDataURL)
+    // returns the actual scene instead of a blank/transparent PNG.
+    preserveDrawingBuffer: true
   });
   // Lower pixel ratio on mobile for performance (still looks good)
   const dpr = isMobile ? 1.0 : Math.min(window.devicePixelRatio, 1.75);

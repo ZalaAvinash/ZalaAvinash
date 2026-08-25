@@ -25,8 +25,9 @@ A single-page 3D experience with:
 ## Tech Stack
 
 - **Three.js** — WebGL 3D rendering
-- **Vanilla JS** — no frameworks, no build tools, no dependencies
-- **CSS** minimal — only what the 3D overlay needs
+- **Vite** — build/dev tooling (bundling, asset hashing, dev server)
+- **Vanilla JS (ES modules)** — no UI frameworks
+- **CSS** — minimal overlay styling only
 
 ---
 

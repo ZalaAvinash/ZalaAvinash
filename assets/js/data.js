@@ -35,7 +35,15 @@ export const portfolioData = {
     { step: "02", title: "Robust Architecture", desc: "Clean .NET backends, modern frontends, cloud-native patterns." },
     { step: "03", title: "Iterative Delivery", desc: "Ship early, test relentlessly, refine with real data." },
     { step: "04", title: "Long-term Evolution", desc: "Production ready with monitoring, docs, and roadmap." }
-  ]
+  ],
+  contact: {
+    email: 'avinashzala@outlook.com',
+    phone: '+91 74051 20804',
+    phoneHref: 'tel:+917405120804',
+    linkedin: 'https://www.linkedin.com/in/avinash-zala/',
+    location: 'Surat, India',
+    resume: 'Resume/Resume.docx'
+  }
 };
 
 export const SECTION_PROGRESS = [0, 0.175, 0.36, 0.55, 0.76, 0.95];

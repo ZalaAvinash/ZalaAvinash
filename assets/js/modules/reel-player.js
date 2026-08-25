@@ -13,6 +13,7 @@ export class ReelPlayer {
     this.reelPlaying = true;
     this.exp.focusedPlane = null;
     this.exp.focusTargetRot = null;
+    this.exp.exitInspect(); // reel takes over the camera — leave inspect mode
     this.exp.interactions.clearGraphLines();
     this.exp.interactions.clearExplorer();
 
@@ -80,6 +81,12 @@ export class ReelPlayer {
   }
 
   stop() {
+    if (!this.reelPlaying) return;
     this.reelPlaying = false;
+    const btn = document.getElementById('reel-btn');
+    if (btn) btn.textContent = 'PLAY REEL';
+    // Leave the camera where it is but stop the scripted orbit so it doesn't
+    // remain frozen at a non-zero offset after a user interruption.
+    if (this.exp) { this.exp.targetOrbit.y = 0; this.exp.targetOrbit.x = 0; }
   }
 }

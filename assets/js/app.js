@@ -17,6 +17,7 @@ import { AudioEngine } from './modules/audio-engine.js';
 import { InteractionHandler } from './modules/interaction-handler.js';
 import { UIManager } from './modules/ui-manager.js';
 import { ReelPlayer } from './modules/reel-player.js';
+import { ContentPanels } from './modules/content-panels.js';
 
 export class PortfolioExperience {
   constructor() {
@@ -56,12 +57,19 @@ export class PortfolioExperience {
     this.envData = null;
     this.journeyData = null;
     this.cameraPath = null;
+    // Click-to-inspect camera mode. When active, the render loop flies the
+    // camera to focusTarget and holds on focusLookAt instead of following the
+    // journey spline — this is what makes TAP TO INSPECT actually work.
+    this.focusMode = false;
+    this.focusTarget = null;     // THREE.Vector3 the camera flies toward
+    this.focusLookAt = null;     // THREE.Vector3 the camera looks at
     this.isMobile = this.isMobile; // expose for other modules
 
     this.audio = new AudioEngine();
     this.ui = new UIManager();
     this.interactions = new InteractionHandler(this);
     this.reelPlayer = new ReelPlayer(this);
+    this.contentPanels = new ContentPanels();
 
     this.init();
 
@@ -120,6 +128,9 @@ export class PortfolioExperience {
       Object.values(this.groups).forEach(g => { if (g) this.scene.add(g); });
 
       this.ui.setupLabels(this.groups);
+      this.contentPanels.init();
+      this.ui.contentPanels = this.contentPanels;   // let UI drive the active panel
+      this.contentPanels.showSection(0);
       this.ui.setupUI(() => this.closeInfo());
       this.interactions.setupEvents();
       this.ui.createProgressDots((i) => this.flyTo(i));
@@ -136,14 +147,19 @@ export class PortfolioExperience {
       const copyBtn = document.getElementById('copy-link-btn');
       if (copyBtn) copyBtn.addEventListener('click', () => this.copyViewLink());
 
-      this.applyDeepLink();
+      this._deepLinkApplied = this.applyDeepLink();
       this.animate();
 
       setTimeout(() => {
         this.audio.init();
         if (this.audio.audioEnabled) this.audio.startAmbientCore();
       }, 650);
-      setTimeout(() => { this.targetProgress = 0.02; }, 420);
+      // Only nudge to the opening station when we did NOT arrive via a deep
+      // link (?p= / ?at=). Otherwise this timeout would clobber the shared
+      // link / section anchor set by applyDeepLink() a few hundred ms later.
+      if (!this._deepLinkApplied) {
+        setTimeout(() => { this.targetProgress = 0.02; }, 420);
+      }
       console.log('%c[3D Portfolio] Ready.', 'color:#3b82f6');
     } catch (err) {
       console.error('[3D Portfolio] Initialization failed — forcing loader removal. Error:', err);
@@ -178,37 +194,73 @@ export class PortfolioExperience {
   }
 
   getCameraTransformAt(p) {
-    const pos = this.cameraPath.getPointAt(Math.min(0.999, Math.max(0, p)));
-    const look = this.cameraPath.getPointAt(Math.min(0.999, Math.max(0, p + 0.018)));
+    // Clamp + use a single look-ahead point so the camera always faces FORWARD
+    // along the journey spline (never back toward the origin).
+    const t = Math.min(0.999, Math.max(0, p));
+    const pos = this.cameraPath.getPointAt(t);
+    const look = this.cameraPath.getPointAt(Math.min(0.999, t + 0.02));
     return { pos, look };
   }
 
   flyTo(i) {
+    this.reelPlayer.stop();         // user navigation overrides the cinematic reel
+    this.focusMode = false;        // leaving inspect mode when user navigates
+    this.focusTarget = null;
+    this.focusLookAt = null;
     this.targetProgress = SECTION_PROGRESS[Math.min(5, Math.max(0, i))] || 0;
+    this.contentPanels.showSection(Math.min(5, Math.max(0, i)));  // restore panel for destination
     document.querySelectorAll('.nav a').forEach((a, idx) => a.classList.toggle('active', idx === i));
     setTimeout(() => document.querySelectorAll('.nav a').forEach(a => a.classList.remove('active')), 900);
   }
 
   showInfo(title, body, action = null) { this.ui.showInfo(title, body, action); }
-  closeInfo() { this.ui.closeInfo(); }
-  playReel() { this.reelPlayer.play(); }
+  closeInfo() {
+    this.reelPlayer.stop();         // dismissing a panel also cancels any running reel
+    this.focusMode = false;       // exit inspect mode when the panel is dismissed
+    this.focusTarget = null;
+    this.focusLookAt = null;
+    this.contentPanels.showSection(this._activeSectionIndex());
+    this.ui.closeInfo();
+  }
+  playReel() { this.contentPanels.hideAll(); this.reelPlayer.play(); }
+
+  _activeSectionIndex() {
+    let current = 0;
+    for (let i = 0; i < SECTION_PROGRESS.length; i++) { if (this.progress >= SECTION_PROGRESS[i]) current = i; }
+    return current;
+  }
+
+  exitInspect() {
+    if (!this.focusMode && !this.focusedPlane) return;
+    this.focusMode = false;
+    this.focusTarget = null;
+    this.focusLookAt = null;
+    this.focusedPlane = null;     // drop focused-project tracking
+    this.focusTargetRot = null;
+    this.clearProjectDetails();   // remove orbiting detail orbs
+    this.contentPanels.showSection(this._activeSectionIndex());  // bring content panel back
+  }
 
   focusCameraOn(worldPos, dist = 3.5) {
+    // Enter inspect mode: the render loop (animate) flies the camera to a point
+    // offset from worldPos along the current view direction and holds there,
+    // looking at worldPos. We do NOT move camera.position here — that would be
+    // overwritten every frame by animate()'s lerp toward the journey spline.
+    if (!worldPos) return;
+    this.contentPanels.hideAll();   // hide the 2D content while inspecting the 3D object
     const dir = this.camera.position.clone().sub(worldPos).normalize();
-    const tgt = worldPos.clone().add(dir.multiplyScalar(dist));
-    const start = this.camera.position.clone();
-    let t = 0;
-    const iv = setInterval(() => {
-      t += 0.028;
-      if (t >= 1) { clearInterval(iv); return; }
-      this.camera.position.lerpVectors(start, tgt, t * t * (3 - 2 * t));
-      this.camera.lookAt(worldPos);
-    }, 16);
+    if (dir.lengthSq() < 1e-6) dir.set(0, 0, 1); // degenerate fallback
+    this.focusTarget = worldPos.clone().add(dir.multiplyScalar(dist));
+    this.focusLookAt = worldPos.clone();
+    this.focusMode = true;
     this.audio.init();
     this.audio.playInspectSound();
   }
 
   captureView() {
+    // preserveDrawingBuffer keeps the last frame, but render once more to be
+    // certain the buffer holds the current frame before we read it.
+    this.renderer.render(this.scene, this.camera);
     const link = document.createElement('a');
     link.download = `avinash-zala-3d-${Date.now()}.png`;
     link.href = this.renderer.domElement.toDataURL('image/png');
@@ -228,8 +280,9 @@ export class PortfolioExperience {
     const params = new URLSearchParams(window.location.search);
     const p = params.get('p');
     const at = params.get('at');
-    if (p) { const val = parseFloat(p); if (!isNaN(val)) { this.progress = Math.max(0, Math.min(1, val)); this.targetProgress = this.progress; } }
-    else if (at) { const map = { about: 0, skills: 0.175, projects: 0.36, experience: 0.55, lab: 0.76, contact: 0.95 }; const target = map[at.toLowerCase()]; if (target !== undefined) { this.progress = target; this.targetProgress = target; } }
+    if (p) { const val = parseFloat(p); if (!isNaN(val)) { this.progress = Math.max(0, Math.min(1, val)); this.targetProgress = this.progress; return true; } }
+    else if (at) { const map = { about: 0, skills: 0.175, projects: 0.36, experience: 0.55, lab: 0.76, contact: 0.95 }; const target = map[at.toLowerCase()]; if (target !== undefined) { this.progress = target; this.targetProgress = target; return true; } }
+    return false;
   }
 
   spawnProjectDetails(plane) {
@@ -320,19 +373,27 @@ export class PortfolioExperience {
   animate() {
     requestAnimationFrame(() => this.animate());
     if (this.paused) return;
-    const delta = this.clock.getDelta(), time = this.clock.elapsedTime;
+    // Clamp delta so returning from a hidden tab (long RAF gap) doesn't
+    // teleport particles / path flows in a single frame.
+    const delta = Math.min(this.clock.getDelta(), 0.05), time = this.clock.elapsedTime;
     this.progress += (this.targetProgress - this.progress) * 0.065;
 
     // Camera
-    const camT = this.getCameraTransformAt(this.progress);
-    let pos = camT.pos.clone();
-    const look = camT.look.clone();
-    const ox = this.orbitOffset.x + (this.targetOrbit.x - this.orbitOffset.x) * 0.08;
-    const oy = this.orbitOffset.y + (this.targetOrbit.y - this.orbitOffset.y) * 0.08;
-    this.orbitOffset.x = ox; this.orbitOffset.y = oy;
-    pos.add(new THREE.Vector3(Math.sin(oy) * 6.5, ox * 5.5, Math.cos(oy) * 6.5));
-    this.camera.position.lerp(pos, 0.11);
-    this.camera.lookAt(look.x + ox * 0.3, look.y + oy * 0.3, look.z + Math.cos(oy) * 0.3);
+    if (this.focusMode && this.focusTarget && this.focusLookAt) {
+      // Inspect mode: fly to the focused object and hold on it.
+      this.camera.position.lerp(this.focusTarget, 0.08);
+      this.camera.lookAt(this.focusLookAt);
+    } else {
+      const camT = this.getCameraTransformAt(this.progress);
+      let pos = camT.pos.clone();
+      const look = camT.look.clone();
+      const ox = this.orbitOffset.x + (this.targetOrbit.x - this.orbitOffset.x) * 0.08;
+      const oy = this.orbitOffset.y + (this.targetOrbit.y - this.orbitOffset.y) * 0.08;
+      this.orbitOffset.x = ox; this.orbitOffset.y = oy;
+      pos.add(new THREE.Vector3(Math.sin(oy) * 6.5, ox * 5.5, Math.cos(oy) * 6.5));
+      this.camera.position.lerp(pos, 0.11);
+      this.camera.lookAt(look.x + ox * 0.3, look.y + oy * 0.3, look.z + Math.cos(oy) * 0.3);
+    }
 
     // Idle sway
     const idleMs = Date.now() - this.interactions.lastInteraction;
@@ -344,7 +405,7 @@ export class PortfolioExperience {
     }
 
     // Updates
-    this.ui.updateProgressDots(this.progress, SECTION_PROGRESS, SECTION_NAMES);
+    this.ui.updateProgressDots(this.progress, SECTION_PROGRESS, SECTION_NAMES, this.focusMode);
     this.updateAllAnimations(time, delta);
     this.updateAllParticles(delta);
     if (this.labParticles) this.updateLabParticles();
@@ -352,7 +413,7 @@ export class PortfolioExperience {
     this.interactions.updateGraphLines(time);
     this.interactions.updateExplorerLines(time);
     this.interactions.updateHover();
-    this.ui.syncLabels(this.camera, this.canvas);
+    this.ui.syncLabels(this.camera, this.canvas, this.progress, this.focusMode);
     updateEnvironment(this.envData, this.progress, time);
     updateJourneyTrail(this.journeyData, this.progress, time, delta);
 
@@ -504,5 +565,6 @@ export function initPortfolio() {
   window.captureView = () => exp.captureView();
   window.copyViewLink = () => exp.copyViewLink();
   window.disposePortfolio = () => exp.dispose();
+  window.__portfolio = exp; // debug handle for inspection/devtools
   return exp;
 }
